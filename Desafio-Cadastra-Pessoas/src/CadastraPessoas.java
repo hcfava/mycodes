@@ -42,8 +42,7 @@ public class CadastraPessoas {
 			case 2:
 				if(!lstPessoa.isEmpty()) {
 					for (int i = 0; i < lstPessoa.size(); i++) {
-						String ret = lstPessoa.get(i).toString();
-						System.out.println(ret);
+						System.out.println(lstPessoa.get(i));
 						System.out.println("");
 					}
 				}else
