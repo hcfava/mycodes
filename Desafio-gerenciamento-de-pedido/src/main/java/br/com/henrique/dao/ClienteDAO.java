@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
+//import org.codehaus.jackson.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
@@ -45,7 +46,6 @@ public class ClienteDAO implements XML {
 		return Collections.unmodifiableList(leListaNoArquivo());
 	}
 
-	@Override
 	public void escreveListaNoArquivo() {
 		try {
 			xmlMapper.writeValue(arquivo, clientes);
@@ -54,35 +54,33 @@ public class ClienteDAO implements XML {
 		}
 	}
 
-	@Override
 	public List<Cliente> leListaNoArquivo() {
 		InputStream inputStream = null;
+		//List<Cliente> lista = new ArrayList<Cliente>();
 		try {
 			inputStream = new FileInputStream(arquivo);
+			TypeReference<List<Cliente>> typeReference = new TypeReference<List<Cliente>>() {};
+			
+			try {
+				clientes = xmlMapper.readValue(inputStream, typeReference);
+				
+			} catch (JsonParseException e) {
+				System.out.println("Erro ao fazer parseamento do arquivo");
+			} catch (JsonMappingException e) {
+				System.out.println("Erro ao fazer mapeamento do arquivo");
+			} catch (IOException e) {
+				System.out.println("Erro de entrada ou saída.");
+			}
+			try {
+				inputStream.close();
+			} catch (IOException e) {
+				System.out.println("Erro ao fechar input stream");
+			}
 		} catch (FileNotFoundException e) {
 			System.out.println("Arquivo não encontrado!");
 		}
-		TypeReference<List<Cliente>> typeReference = new TypeReference<List<Cliente>>() {};
-		List<Cliente> lista = new ArrayList<Cliente>();
-		try {
-			lista = xmlMapper.readValue(inputStream, typeReference);
-		} catch (JsonParseException e) {
-			System.out.println("Erro ao fazer parseamento do arquivo");
-		} catch (JsonMappingException e) {
-			System.out.println("Erro ao fazer mapeamento do arquivo");
-		} catch (IOException e) {
-			System.out.println("Erro de entrada ou saída.");
-		}
-		try {
-			inputStream.close();
-		} catch (IOException e) {
-			System.out.println("Erro ao fechar input stream");
-		}
-		
-		if(lista.isEmpty()) {
-			System.out.println("Não existem clientes cadastrados!");
-		}
-		return lista;
+		return clientes;
+
 	}
 
 }

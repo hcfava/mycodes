@@ -24,7 +24,6 @@ public class PedidoDAO implements XML {
 	private static final XmlMapper xmlMapper = new XmlMapper();
 	private File arquivo = new File(fileName);
 
-
 	public static synchronized PedidoDAO getInstance() throws IOException {
 		if (instance == null) {
 			instance = new PedidoDAO();
@@ -41,7 +40,6 @@ public class PedidoDAO implements XML {
 		return Collections.unmodifiableList(leListaNoArquivo());
 	}
 
-	@Override
 	public void escreveListaNoArquivo() {
 		try {
 			xmlMapper.writeValue(arquivo, pedidos);
@@ -50,34 +48,32 @@ public class PedidoDAO implements XML {
 		}
 	}
 
-	@Override
 	public List<Pedido> leListaNoArquivo() {
 		InputStream inputStream = null;
+		List<Pedido> lista = new ArrayList<Pedido>();
 		try {
 			inputStream = new FileInputStream(arquivo);
+			TypeReference<List<Pedido>> typeReference = new TypeReference<List<Pedido>>() {
+			};
+
+			try {
+				lista = xmlMapper.readValue(inputStream, typeReference);
+			} catch (JsonParseException e) {
+				System.out.println("Erro ao fazer parseamento do arquivo");
+			} catch (JsonMappingException e) {
+				System.out.println("Erro ao fazer mapeamento do arquivo");
+			} catch (IOException e) {
+				System.out.println("Erro de entrada ou saída.");
+			}
+			try {
+				inputStream.close();
+			} catch (IOException e) {
+				System.out.println("Erro ao fechar input stream");
+			}
 		} catch (FileNotFoundException e) {
 			System.out.println("Arquivo não encontrado!");
 		}
-		TypeReference<List<Pedido>> typeReference = new TypeReference<List<Pedido>>() {};
-		List<Pedido> lista = new ArrayList<Pedido>();
-		try {
-			lista = xmlMapper.readValue(inputStream, typeReference);
-		} catch (JsonParseException e) {
-			System.out.println("Erro ao fazer parseamento do arquivo");
-		} catch (JsonMappingException e) {
-			System.out.println("Erro ao fazer mapeamento do arquivo");
-		} catch (IOException e) {
-			System.out.println("Erro de entrada ou saída.");
-		}
-		try {
-			inputStream.close();
-		} catch (IOException e) {
-			System.out.println("Erro ao fechar input stream");
-		}
-		
-		if(lista.isEmpty()) {
-			System.out.println("Não existem pedidos cadastrados!");
-		}
+
 		return lista;
 	}
 }

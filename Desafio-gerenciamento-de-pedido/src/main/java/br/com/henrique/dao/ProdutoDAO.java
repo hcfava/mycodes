@@ -24,7 +24,6 @@ public class ProdutoDAO implements XML {
 	private static final XmlMapper xmlMapper = new XmlMapper();
 	private File arquivo = new File(fileName);
 
-
 	public static synchronized ProdutoDAO getInstance() throws IOException {
 		if (instance == null) {
 			instance = new ProdutoDAO();
@@ -42,7 +41,7 @@ public class ProdutoDAO implements XML {
 	}
 
 	public List<Produto> findAllEstoque() {
-		List<Produto> estoque = new ArrayList<Produto>(produtos);
+		List<Produto> estoque = new ArrayList<Produto>(findAll());
 		produtos.forEach(p -> {
 			if (!p.temEmEstoque())
 				estoque.remove(p);
@@ -62,33 +61,30 @@ public class ProdutoDAO implements XML {
 	@Override
 	public List<Produto> leListaNoArquivo() {
 		InputStream inputStream = null;
+		List<Produto> lista = new ArrayList<Produto>();
 		try {
 			inputStream = new FileInputStream(arquivo);
+			TypeReference<List<Produto>> typeReference = new TypeReference<List<Produto>>() {
+			};
+			try {
+				lista = xmlMapper.readValue(inputStream, typeReference);
+			} catch (JsonParseException e) {
+				System.out.println("Erro ao fazer parseamento do arquivo");
+			} catch (JsonMappingException e) {
+				System.out.println("Erro ao fazer mapeamento do arquivo");
+			} catch (IOException e) {
+				System.out.println("Erro de entrada ou saída.");
+			}
+			try {
+				inputStream.close();
+			} catch (IOException e) {
+				System.out.println("Erro ao fechar input stream");
+			}
+
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			System.out.println("Erro, arquivo não encontrado!");
 		}
-		TypeReference<List<Produto>> typeReference = new TypeReference<List<Produto>>() {
-		};
-		List<Produto> lista = null;
-		try {
-			lista = xmlMapper.readValue(inputStream, typeReference);
-		} catch (JsonParseException e) {
-			System.out.println("Erro ao fazer parseamento do arquivo");
-		} catch (JsonMappingException e) {
-			System.out.println("Erro ao fazer mapeamento do arquivo");
-		} catch (IOException e) {
-			System.out.println("Erro de entrada ou saída.");
-		}
-		try {
-			inputStream.close();
-		} catch (IOException e) {
-			System.out.println("Erro ao fechar input stream");
-		}
 		
-		if(lista.isEmpty()) {
-			System.out.println("Não existem produtos cadastrados!");
-		}
 		return lista;
 	}
 }
